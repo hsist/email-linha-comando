@@ -33,14 +33,14 @@ try {
     //Attachments
     /*$mail->addAttachment('/var/tmp/file.tar.gz');         //Add attachments
     $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    //Optional name*/
-    if(isset($argv[3]) && !empty($argv[3])){
-        $mail->addAttachment($argv[3]);
+    if(isset($argv[2]) && !empty($argv[2])){
+        $mail->addAttachment($argv[2]);
     }
 
     //Content
     $mail->isHTML(true);                                  //Set email format to HTML
     $mail->Subject = $argv[1];
-    $mail->Body    = $argv[2];
+    $mail->Body    = 'CORPO';
     $mail->AltBody = 'Conteúdo alternativo';
 
     $mail->send();
