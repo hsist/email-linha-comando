@@ -11,40 +11,56 @@ require 'vendor/autoload.php';
 //Create an instance; passing `true` enables exceptions
 $mail = new PHPMailer(true);
 
+$json = json_decode($argv[1], true);
+$result = array("success" => true,"mensage" => "Mensagem enviada");
+
 try {
     //Server settings
-    $mail->SMTPDebug = SMTP::DEBUG_SERVER;                      //Enable verbose debug output
+    //$mail->SMTPDebug = SMTP::DEBUG_SERVER;                    //Enable verbose debug output
     $mail->isSMTP();                                            //Send using SMTP
-    $mail->Host       = 'email-ssl.com.br';                     //Set the SMTP server to send through
-    $mail->SMTPAuth   = true;                                   //Enable SMTP authentication
-    $mail->Username   = 'daniel@hsist.com.br';                     //SMTP username
-    $mail->Password   = 'a03021984*A';                               //SMTP password
-    $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            //Enable implicit TLS encryption
-    $mail->Port       = 465;                                    //TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
-
-    //Recipients
-    $mail->setFrom('daniel@hsist.com.br', 'Daniel HSist');
-    $mail->addAddress('daniel@hsist.com.br');     //Add a recipient
-    /*$mail->addAddress('ellen@example.com');               //Name is optional
-    $mail->addReplyTo('info@example.com', 'Information');
-    $mail->addCC('cc@example.com');
-    $mail->addBCC('bcc@example.com');*/
-
-    //Attachments
-    /*$mail->addAttachment('/var/tmp/file.tar.gz');         //Add attachments
-    $mail->addAttachment('/tmp/image.jpg', 'new.jpg');    //Optional name*/
-    if(isset($argv[2]) && !empty($argv[2])){
-        $mail->addAttachment($argv[2]);
+    // -----------------------------------------------
+    // Configuração para envio
+    $mail->Host       = $json['host'];                          // Set the SMTP server to send through
+    $mail->SMTPAuth   = true;                                   // Enable SMTP authentication
+    $mail->Username   = $json['user'];                          // SMTP username
+    $mail->Password   = $json['password'];                      // SMTP password
+    if ($json['secure'] == "SMTPS"){
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;            
+    } else {
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;            
     }
-
-    //Content
-    $mail->isHTML(true);                                  //Set email format to HTML
-    $mail->Subject = $argv[1];
-    $mail->Body    = 'CORPO';
-    $mail->AltBody = 'Conteúdo alternativo';
-
+    $mail->Port       = $json['port'];                          // TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
+    // -----------------------------------------------
+    // Remetente
+    $mail->setFrom($json['user'],$json['name']);                // Quem envia
+    // -----------------------------------------------
+    // Destinatários
+    foreach($json['addres'] as $email) {
+        $mail->addAddress($email['email']);                     // Quem recebe
+    }
+    // -----------------------------------------------
+    // Anexos
+    if(isset($json['attachment'])){
+        foreach($json['attachment'] as $file) {
+            $mail->addAttachment($file['file']);
+        }
+    }
+    // -----------------------------------------------
+    // Conteúdo
+    if ($json['html'] == true){
+        $mail->isHTML(true);                                    // Set email format to HTML
+    }                                    
+    $mail->Subject = $json['content']['subject'];               // Assunto
+    $mail->Body    = $json['content']['body'];                  // Corpo do e-mail
+    $mail->AltBody = $json['content']['altbody'];               // Texto limpo, sem html (evita que a msg caia em spam)
+    // -----------------------------------------------
+    // Envio
     $mail->send();
-    echo 'Mensagem enviada';
+    echo json_encode($result);
+
 } catch (Exception $e) {
-    echo "Mensagem não enviada. Mailer Erro: {$mail->ErrorInfo}";
+    $result['success'] = false;
+    $result['mensage'] = "Mensagem não pôde ser enviada. Erro do Mailer: {$mail->ErrorInfo}";
+    echo json_encode($result);
+
 }
