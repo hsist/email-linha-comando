@@ -18,6 +18,7 @@ try {
     //Server settings
     //$mail->SMTPDebug = SMTP::DEBUG_SERVER;                    //Enable verbose debug output
     $mail->isSMTP();                                            //Send using SMTP
+    $mail->CharSet    = 'UTF-8';
     // -----------------------------------------------
     // Configuração para envio
     $mail->Host       = $json['host'];                          // Set the SMTP server to send through
