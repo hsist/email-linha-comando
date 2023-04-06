@@ -33,7 +33,7 @@ try {
     $mail->Port       = $json['port'];                          // TCP port to connect to; use 587 if you have set `SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS`
     // -----------------------------------------------
     // Remetente
-    $mail->setFrom($json['user'],$json['name']);                // Quem envia
+    $mail->setFrom($json['from'],$json['name']);                // Quem envia
     // -----------------------------------------------
     // Destinatários
     foreach($json['addres'] as $email) {
@@ -50,7 +50,9 @@ try {
     // Conteúdo
     if ($json['html'] == true){
         $mail->isHTML(true);                                    // Set email format to HTML
-    }                                    
+    } else {
+        $mail->isHTML(false);
+    }                             
     $mail->Subject = $json['content']['subject'];               // Assunto
     $mail->Body    = $json['content']['body'];                  // Corpo do e-mail
     $mail->AltBody = $json['content']['altbody'];               // Texto limpo, sem html (evita que a msg caia em spam)
